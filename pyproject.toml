@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "discovery-runtime"
-version = "0.3.0"
+version = "0.4.0"
 description = "Generic Intent-Discovery runtime — words → sealed VerifiedIntent via multi-witness readers, fusion, clarification, and seal. Domain-agnostic; RAAAL/Quantify and GRC are consumers."
 readme = "README.md"
 requires-python = ">=3.10"

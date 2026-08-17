@@ -26,17 +26,23 @@ from runtime_contracts import (
 )
 
 from .intent import clarifications, draft_intent, interpreted, resolve
+from .fusion import Decision, Fusion, Proposal, fuse, same_value
 from .reader import Reader, Reading, merge_readings
 from .runtime import DiscoveryRuntime
 from .seal import digest, seal
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "DiscoveryRuntime",
     "Reader",
     "Reading",
     "merge_readings",
+    "Fusion",
+    "Proposal",
+    "Decision",
+    "fuse",
+    "same_value",
     "draft_intent",
     "interpreted",
     "clarifications",

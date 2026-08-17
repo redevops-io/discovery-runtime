@@ -19,9 +19,11 @@ under — two answers to "which field is this about" and no rule for which wins.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Protocol
+from typing import Any, Dict, List, Mapping, Optional, Protocol
 
 from runtime_contracts import DecisionEvidence, Unresolved
+
+from .fusion import Fusion, Proposal, fuse
 
 #: Evidence, by the field it supports.
 EvidenceByField = Dict[str, List[DecisionEvidence]]
@@ -53,9 +55,15 @@ class Reader(Protocol):
     def read(self, text: str) -> Reading: ...
 
 
-def merge_readings(readings: List[Reading]) -> Reading:
+def merge_readings(readings: List[Reading], *,
+                   compare_as: Optional[Mapping[str, str]] = None,
+                   normalizers: Optional[Mapping[str, Any]] = None) -> Reading:
     """Fuse readers. Agreement on a material field is kept; disagreement makes the field
     ``Unresolved`` (a "what did you mean?" question). No reader is privileged.
+
+    ``compare_as`` maps a dimension to the name of its comparison rule and ``normalizers`` says
+    what those names mean — both supplied by the domain, because whether ``£2.5k`` and ``2500``
+    are the same number is a domain fact and this module does not know about money.
 
     Pure function — same readings in, same fused reading out. This is the functional core of
     multi-witness discovery; the runtime shell only decides *which* readers run.
@@ -72,17 +80,25 @@ def merge_readings(readings: List[Reading]) -> Reading:
         for name, items in reading.evidence.items():
             merged.setdefault(name, []).extend(items)
 
-    # Compared by canonical value, not by the evidence object: two readers that agree agree even
-    # when they cite different spans and carry different confidences.
+    # Judged by the schema's comparison rule, not by `repr`. Comparing
+    # representations made `'500'` and `500` a disagreement, so a deterministic
+    # reader that normalises and a model that does not produced a clarification
+    # question on every amount they both got right.
     contested = []
     for name, items in merged.items():
-        distinct = {repr(item.value) for item in items}
-        if len(distinct) > 1:
+        decision = fuse(
+            name,
+            [Proposal(value=item.value, reader_id=item.reader_id,
+                      source_ref=item.source_ref) for item in items],
+            mode=(compare_as or {}).get(name, "TEXT"),
+            normalizers=normalizers,
+        )
+        if not decision.proceeds:
             contested.append(
                 Unresolved(
                     dimension=name,
-                    reason=_disagreement_reason(),
-                    detail=f"readers disagree on {name}: {sorted(distinct)}",
+                    reason=_reason_for(decision.outcome),
+                    detail=decision.detail,
                     evidence=tuple(items),
                     result_changing=True,
                 )
@@ -95,8 +111,17 @@ def merge_readings(readings: List[Reading]) -> Reading:
     )
 
 
-def _disagreement_reason():
-    """``UNRESOLVED_DISAGREEMENT`` — named through the contract rather than spelled here."""
+def _reason_for(outcome: Fusion):
+    """The contract's reason for a fusion outcome.
+
+    A language ambiguity and a reader disagreement are both open questions and
+    they are not the same open question — one is answered by the person saying
+    which they meant, the other by adjudicating two readers. The contract has
+    one enum for why a dimension is open, so this is where the distinction is
+    carried across; the fuller detail travels in ``Unresolved.detail``.
+    """
     from runtime_contracts import OpenReason
 
+    if outcome is Fusion.AMBIGUOUS_BY_LANGUAGE:
+        return OpenReason.NOT_ASKED
     return OpenReason.UNRESOLVED_DISAGREEMENT
