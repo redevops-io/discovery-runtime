@@ -40,6 +40,19 @@ class Reading:
     payload: Any
     evidence: EvidenceByField = field(default_factory=dict)
     unresolved: List[Unresolved] = field(default_factory=list)
+    #: Relations the reader established between values — "this ratio belongs to
+    #: that account", not "this dimension has that value".
+    #:
+    #: Carried because the contract carries them: `VerifiedIntent.relations` is
+    #: inside `canonical_form`, so an intent that drops them is a different
+    #: request. Two readings naming the same instruments in different roles are
+    #: not the same reading, and a runtime that only moved dimensions would
+    #: lose that distinction silently.
+    #:
+    #: The runtime does not interpret them. What a relation *kind* means, and
+    #: how one is found in a sentence, are the domain's; this only ensures they
+    #: survive the journey from reader to sealed artifact.
+    relations: List[Any] = field(default_factory=list)
 
 
 class Reader(Protocol):
@@ -104,10 +117,20 @@ def merge_readings(readings: List[Reading], *,
                 )
             )
 
+    # Relations from every reader, in order, de-duplicated by identity. A
+    # relation two readers both found is one relation, not corroboration to be
+    # counted twice.
+    relations = []
+    for reading in readings:
+        for relation in reading.relations:
+            if relation not in relations:
+                relations.append(relation)
+
     return Reading(
         payload=base.payload,
         evidence=merged,
         unresolved=list(base.unresolved) + contested,
+        relations=relations,
     )
 
 

@@ -98,6 +98,7 @@ def draft_intent(
     return VerifiedIntent(
         objective=objective,
         fields=fields,
+        relations=tuple(reading.relations),
         unresolved=tuple(reading.unresolved),
         produced_by=PRODUCED_BY,
         utterance_ref=utterance_ref(text),
