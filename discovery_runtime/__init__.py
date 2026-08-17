@@ -11,26 +11,26 @@ in ``runtime-contracts``; finance semantics stay in wealth-manager; GRC is the s
     rt = DiscoveryRuntime(schema=my_schema, readers=[MyRuleReader()])
     vi = rt.draft("…")
     for q in rt.clarifications(vi):
-        vi = rt.resolve(vi, q.field, answer_for(q))
-    vi = rt.seal(vi)          # raises SealError if anything result-changing is still open
+        vi = rt.resolve(vi, q.dimension, answer_for(q))
+    vi = rt.seal(vi)          # raises NotSealable if anything result-changing is still open
 """
 from __future__ import annotations
 
-from runtime_contracts.intent import (
+from runtime_contracts import (
     Amendment,
     DecisionEvidence,
     IntentState,
-    SealError,
+    NotSealable,
     Unresolved,
     VerifiedIntent,
 )
 
-from .intent import clarifications, draft_intent, resolve
+from .intent import clarifications, draft_intent, interpreted, resolve
 from .reader import Reader, Reading, merge_readings
 from .runtime import DiscoveryRuntime
 from .seal import digest, seal
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "DiscoveryRuntime",
@@ -38,6 +38,7 @@ __all__ = [
     "Reading",
     "merge_readings",
     "draft_intent",
+    "interpreted",
     "clarifications",
     "resolve",
     "seal",
@@ -48,5 +49,5 @@ __all__ = [
     "Unresolved",
     "Amendment",
     "IntentState",
-    "SealError",
+    "NotSealable",
 ]

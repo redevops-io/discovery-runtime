@@ -15,7 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from runtime_contracts.intent import Unresolved, VerifiedIntent
+from runtime_contracts import Unresolved, VerifiedIntent
 
 from .intent import (
     Canonicalize,
@@ -23,6 +23,7 @@ from .intent import (
     _default_canonicalize,
     clarifications,
     draft_intent,
+    interpreted,
     resolve,
 )
 from .reader import Reader, merge_readings
@@ -37,6 +38,10 @@ class DiscoveryRuntime:
 
     readers: list[Reader]
     schema: Any = None
+    #: What requests to this runtime are *for*. The contract requires it and the runtime cannot
+    #: invent it: "what is this request for" is a domain statement, and a generic default would
+    #: put a made-up objective on every intent the domain drafts.
+    objective: str = ""
     canonicalize: Canonicalize = _default_canonicalize
     fusion_policy: FusionPolicy = field(default=merge_readings)
 
@@ -44,6 +49,7 @@ class DiscoveryRuntime:
         """Words → unsealed ``VerifiedIntent`` (readers → fuse → canonicalize)."""
         return draft_intent(
             text, self.readers,
+            objective=self.objective,
             canonicalize=self.canonicalize,
             fusion_policy=self.fusion_policy,
         )
@@ -52,16 +58,20 @@ class DiscoveryRuntime:
         """Open result-changing questions for this intent, in order."""
         return clarifications(vi)
 
-    def resolve(self, vi: VerifiedIntent, field: str, value: Any) -> VerifiedIntent:
+    def resolve(self, vi: VerifiedIntent, dimension: str, value: Any) -> VerifiedIntent:
         """Record the requester's authoritative answer to one open question."""
-        return resolve(vi, field, value)
+        return resolve(vi, dimension, value)
+
+    def interpreted(self, vi: VerifiedIntent) -> dict:
+        """The settled dimensions as a plain name -> value mapping."""
+        return interpreted(vi)
 
     def seal(self, vi: VerifiedIntent) -> VerifiedIntent:
         """Seal — refuses while any result-changing dimension is open."""
         return seal(vi)
 
     def understand(self, text: str) -> VerifiedIntent:
-        """Convenience: draft then seal in one call. Raises ``SealError`` if the request is not
+        """Convenience: draft then seal in one call. Raises ``NotSealable`` if the request is not
         fully pinned — callers that expect open questions should use ``draft`` + ``clarifications``
         + ``resolve`` and seal only once nothing result-changing is open."""
         return self.seal(self.draft(text))
