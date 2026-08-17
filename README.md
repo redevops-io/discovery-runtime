@@ -1,3 +1,24 @@
+## Release line
+
+Current: **v0.1.4**. `v0.2.0` is reserved for the coordinated release milestone
+across `runtime-contracts` and this package, and nothing before it may claim a
+`0.2.x` or higher number.
+
+### Superseded tags
+
+`v0.3.0` and `v0.4.0` were published in error. This package had never released
+a tag — its `pyproject.toml` said `0.2.0` and nothing was ever pushed — so those
+two took numbers off a line that had not been opened.
+
+They point at the same commits as the correct tags and are left in place rather
+than deleted, because a published tag is immutable and deleting one breaks
+anybody who already pinned it:
+
+    v0.3.0  ==  v0.1.3   (superseded — do not pin)
+    v0.4.0  ==  v0.1.4   (superseded — do not pin)
+
+Pin `v0.1.4`.
+
 # discovery-runtime
 
 The generic **Intent-Discovery runtime**: turn a requester's words into a sealed `VerifiedIntent`.
