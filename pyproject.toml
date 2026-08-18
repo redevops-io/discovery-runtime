@@ -18,7 +18,7 @@ keywords = ["redevops", "discovery", "intent", "runtime", "verified-intent"]
 # and VerifiedIntent, every conformance test failed, and neither repository could see it alone.
 # tests/test_contract_compatibility.py asserts the installed version matches this.
 dependencies = [
-    "runtime-contracts @ git+https://github.com/redevops-io/runtime-contracts.git@v0.2.2",
+    "runtime-contracts @ git+https://github.com/redevops-io/runtime-contracts.git@v0.2.4",
 ]
 
 [project.optional-dependencies]
