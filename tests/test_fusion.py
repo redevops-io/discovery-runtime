@@ -221,3 +221,88 @@ def test_merge_readings_still_reports_real_disagreement():
     fused = merge_readings(readings, compare_as={"amount": "NUMBER"},
                            normalizers=NORMALIZERS)
     assert [u.dimension for u in fused.unresolved] == ["amount"]
+
+
+# --- every reader's payload, not the first one's -----------------------------
+
+def _reading(payload, reader_id):
+    from runtime_contracts import DecisionEvidence, ReaderKind
+
+    from discovery_runtime import Reading
+
+    return Reading(
+        payload=dict(payload),
+        evidence={name: [DecisionEvidence(reader_id=reader_id,
+                                          kind=ReaderKind.RULE, value=value,
+                                          source_ref="s")]
+                  for name, value in payload.items()})
+
+
+def test_a_dimension_only_a_later_reader_proposed_survives():
+    """It was fused, decided, and then dropped.
+
+    `merge_readings` merged evidence across every reader and took the payload
+    from `readings[0]`, so a dimension only the second reader proposed was
+    absent from the payload *and* absent from `unresolved` — the one outcome
+    this module must never produce, because a caller sees neither a value nor a
+    question.
+
+    Invisible for a single reader, and for any set where the first reader
+    happens to mention everything. Found from a consumer whose second reader is
+    a deterministic rule reader that exists to add what the model omitted, so
+    the dimension it contributed was guaranteed to be the missing one.
+    """
+    from discovery_runtime import merge_readings
+
+    merged = merge_readings([_reading({"amount": "500"}, "model"),
+                             _reading({"cadence": "monthly"}, "rules")])
+
+    assert merged.payload == {"amount": "500", "cadence": "monthly"}
+    assert not merged.unresolved
+
+
+def test_a_dropped_dimension_is_never_silently_absent():
+    """The property stated as itself: settled or questioned, never neither."""
+    from discovery_runtime import merge_readings
+
+    readings = [_reading({"amount": "500"}, "model"),
+                _reading({"cadence": "monthly", "amount": "500"}, "rules")]
+    merged = merge_readings(readings)
+
+    proposed = {name for reading in readings for name in reading.payload}
+    accounted = set(merged.payload or {}) | {u.dimension for u in merged.unresolved}
+    assert proposed <= accounted, f"{sorted(proposed - accounted)} vanished"
+
+
+def test_readers_that_disagree_still_contest_the_field():
+    """The half that must not weaken. Merging payloads must not let a later
+    reader's value paper over a disagreement."""
+    from discovery_runtime import merge_readings
+
+    merged = merge_readings([_reading({"amount": "500"}, "model"),
+                             _reading({"amount": "600"}, "rules")])
+
+    assert "amount" not in (merged.payload or {})
+    assert [u.dimension for u in merged.unresolved] == ["amount"]
+
+
+def test_the_first_reader_wins_a_key_they_agree_about():
+    """Order decides nothing that matters.
+
+    A key two readers disagree about is contested and removed, so the only
+    keys where precedence is reachable are ones they agree about — where the
+    choice cannot change meaning.
+    """
+    from discovery_runtime import merge_readings
+
+    merged = merge_readings([_reading({"amount": "$500"}, "model"),
+                             _reading({"amount": "$500"}, "rules")])
+    assert merged.payload == {"amount": "$500"}
+
+
+def test_a_single_reader_is_unchanged():
+    """The path every existing consumer takes."""
+    from discovery_runtime import merge_readings
+
+    one = _reading({"amount": "500", "cadence": "monthly"}, "model")
+    assert merge_readings([one]).payload == one.payload

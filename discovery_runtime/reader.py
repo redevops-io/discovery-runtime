@@ -150,7 +150,30 @@ def merge_readings(readings: List[Reading], *,
     # other would act on half a decision" — and it is right: an ambiguous term
     # whose value survives into `fields` has been silently resolved, whatever
     # the unresolved list says about it.
-    payload = base.payload
+    # Every reader's payload, not the first one's.
+    #
+    # This was `base.payload`, so a dimension only the second reader proposed
+    # was fused, decided, and then dropped — absent from the payload and absent
+    # from `unresolved`, which is the one outcome this module must never
+    # produce. Evidence was merged across readers all along; the payload was
+    # not, and the asymmetry is invisible for a single reader and for any set
+    # where the first reader happens to mention everything.
+    #
+    # Found from Quantify, whose serving path builds one Reading and never
+    # exercised this. Its second reader is a deterministic rule reader that
+    # exists precisely to add what the model omitted — so the one dimension it
+    # contributed was the one guaranteed to be missing from the first payload.
+    #
+    # Earlier readers win a key, which decides nothing: a key two readers
+    # disagree about is `contested` and removed below, so the only keys reached
+    # here are ones they agree about.
+    payload = None
+    for reading in readings:
+        if isinstance(reading.payload, dict):
+            payload = {**reading.payload, **(payload or {})}
+    if payload is None:
+        payload = base.payload
+
     if isinstance(payload, dict) and contested:
         undecided = {u.dimension for u in contested}
         payload = {k: v for k, v in payload.items() if k not in undecided}
