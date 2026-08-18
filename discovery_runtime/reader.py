@@ -70,7 +70,9 @@ class Reader(Protocol):
 
 def merge_readings(readings: List[Reading], *,
                    compare_as: Optional[Mapping[str, str]] = None,
-                   normalizers: Optional[Mapping[str, Any]] = None) -> Reading:
+                   normalizers: Optional[Mapping[str, Any]] = None,
+                   ambiguity: Optional[Any] = None,
+                   material: Optional[Any] = None) -> Reading:
     """Fuse readers. Agreement on a material field is kept; disagreement makes the field
     ``Unresolved`` (a "what did you mean?" question). No reader is privileged.
 
@@ -78,14 +80,26 @@ def merge_readings(readings: List[Reading], *,
     what those names mean — both supplied by the domain, because whether ``£2.5k`` and ``2500``
     are the same number is a domain fact and this module does not know about money.
 
+    ``ambiguity`` is called as ``ambiguity(dimension, evidence, proposed)`` and returns the
+    competing readings when the *words themselves* carry more than one, or an empty sequence.
+    Which terms are ambiguous, and between which dimensions, is domain vocabulary: this module
+    provides the outcome and the domain provides the observation. Omitting it means no lexical
+    ambiguity is ever detected — readers that agree will settle a word that genuinely carries two
+    meanings, which is a silent choice between them.
+
     Pure function — same readings in, same fused reading out. This is the functional core of
     multi-witness discovery; the runtime shell only decides *which* readers run.
     """
     if not readings:
         return Reading(payload=None)
-    if len(readings) == 1:
-        return readings[0]
 
+    # No short-circuit for a single reader. One witness means there is nothing
+    # to *compare*, not nothing to *decide*: a lexical ambiguity is a property
+    # of the words, and a dimension that needs a binding needs it whether one
+    # reader or three proposed the value. Returning the lone reading unchanged
+    # skipped every per-dimension outcome — so a sentence carrying two readings
+    # settled on one of them silently, which is the failure the outcomes exist
+    # to prevent.
     base = readings[0]
 
     merged: EvidenceByField = {}
@@ -105,6 +119,9 @@ def merge_readings(readings: List[Reading], *,
                       source_ref=item.source_ref) for item in items],
             mode=(compare_as or {}).get(name, "TEXT"),
             normalizers=normalizers,
+            ambiguous_between=(
+                tuple(ambiguity(name, items, tuple(merged)))
+                if ambiguity is not None else ()),
         )
         if not decision.proceeds:
             contested.append(
@@ -113,7 +130,8 @@ def merge_readings(readings: List[Reading], *,
                     reason=_reason_for(decision.outcome),
                     detail=decision.detail,
                     evidence=tuple(items),
-                    result_changing=True,
+                    result_changing=(True if material is None
+                                     else bool(material(name))),
                 )
             )
 
@@ -126,8 +144,19 @@ def merge_readings(readings: List[Reading], *,
             if relation not in relations:
                 relations.append(relation)
 
+    # A dimension fusion did not settle is removed from the payload, not left
+    # in it with a flag beside it. The contract refuses an intent where a name
+    # is both settled and unresolved — "a consumer reading one and not the
+    # other would act on half a decision" — and it is right: an ambiguous term
+    # whose value survives into `fields` has been silently resolved, whatever
+    # the unresolved list says about it.
+    payload = base.payload
+    if isinstance(payload, dict) and contested:
+        undecided = {u.dimension for u in contested}
+        payload = {k: v for k, v in payload.items() if k not in undecided}
+
     return Reading(
-        payload=base.payload,
+        payload=payload,
         evidence=merged,
         unresolved=list(base.unresolved) + contested,
         relations=relations,
