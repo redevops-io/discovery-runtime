@@ -31,7 +31,7 @@ from .reader import Reader, Reading, merge_readings
 from .runtime import DiscoveryRuntime
 from .seal import digest, seal
 
-__version__ = "0.1.4"
+__version__ = "0.1.8"
 
 __all__ = [
     "DiscoveryRuntime",
