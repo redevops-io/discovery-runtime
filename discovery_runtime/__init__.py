@@ -13,6 +13,12 @@ in ``runtime-contracts``; finance semantics stay in wealth-manager; GRC is the s
     for q in rt.clarifications(vi):
         vi = rt.resolve(vi, q.field, answer_for(q))
     vi = rt.seal(vi)          # raises SealError if anything result-changing is still open
+
+v0.2.x adds an **incremental** path beside the stateless sealer: given an explicit ``EvidenceChange``
+set and a version-aware ``DiscoveryCheckpoint`` ``{evidence_position, policy_version,
+capability_set_version}``, ``discover_incremental`` re-derives ONLY the conclusions the change (or a
+policy/capability bump) affects — marking them STALE (re-evaluate) or INVALIDATED (basis gone) — while
+the rest stay VERIFIED. ``discover_full`` is the rescan baseline (Benchmark B). Not a stream processor.
 """
 from __future__ import annotations
 
