@@ -30,8 +30,19 @@ from .fusion import Decision, Fusion, Proposal, fuse, same_value
 from .reader import Reader, Reading, merge_readings
 from .runtime import DiscoveryRuntime
 from .seal import digest, seal
+from .incremental import (
+    DiscoveryCheckpoint,
+    IncrementalReport,
+    IncrementalResult,
+    classify,
+    discover_incremental,
+    discover_full,
+    evidence_ids,
+    mark_stale,
+    mark_invalidated,
+)
 
-__version__ = "0.1.9"
+__version__ = "0.1.10"
 
 __all__ = [
     "DiscoveryRuntime",
@@ -49,6 +60,16 @@ __all__ = [
     "resolve",
     "seal",
     "digest",
+    # incremental Discovery (checkpoint + EvidenceChange-driven recompute; Benchmark B)
+    "DiscoveryCheckpoint",
+    "IncrementalReport",
+    "IncrementalResult",
+    "classify",
+    "discover_incremental",
+    "discover_full",
+    "evidence_ids",
+    "mark_stale",
+    "mark_invalidated",
     # re-exported canonical contracts (single owner = runtime-contracts)
     "VerifiedIntent",
     "DecisionEvidence",
