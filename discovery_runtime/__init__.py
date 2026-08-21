@@ -29,6 +29,17 @@ from .intent import clarifications, draft_intent, resolve
 from .reader import Reader, Reading, merge_readings
 from .runtime import DiscoveryRuntime
 from .seal import digest, seal
+from .incremental import (
+    DiscoveryCheckpoint,
+    IncrementalReport,
+    IncrementalResult,
+    classify,
+    discover_incremental,
+    discover_full,
+    evidence_ids,
+    mark_stale,
+    mark_invalidated,
+)
 
 __version__ = "0.2.0"
 
@@ -42,6 +53,16 @@ __all__ = [
     "resolve",
     "seal",
     "digest",
+    # incremental Discovery (Slice 3)
+    "DiscoveryCheckpoint",
+    "IncrementalReport",
+    "IncrementalResult",
+    "classify",
+    "discover_incremental",
+    "discover_full",
+    "evidence_ids",
+    "mark_stale",
+    "mark_invalidated",
     # re-exported canonical contracts (single owner = runtime-contracts)
     "VerifiedIntent",
     "DecisionEvidence",
