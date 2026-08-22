@@ -42,7 +42,7 @@ from .incremental import (
     mark_invalidated,
 )
 
-__version__ = "0.1.10"
+__version__ = "0.1.12"
 
 __all__ = [
     "DiscoveryRuntime",
