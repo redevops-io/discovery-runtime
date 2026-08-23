@@ -129,25 +129,35 @@ def discover_incremental(conclusions: list[VerifiedIntent], changes: list[Eviden
     ``rediscover(vi) -> VerifiedIntent`` re-runs Discovery for a STALE conclusion's inputs against the
     current evidence, returning a fresh sealed conclusion (the engine stamps current versions on it).
     If ``rediscover`` is None the affected conclusions are only *marked* STALE (report-only mode)."""
-    out: list[VerifiedIntent] = []
+    # classify is cheap + deterministic; the STALE re-derivations (rediscover) are the independent,
+    # latency-dominant work. Classify serially (in order), then recompute the STALE conclusions in
+    # parallel when DISCOVERY_CONCURRENCY>1 — order and the report are preserved, so the valid state is
+    # identical to the serial path.
+    from ._parallel import run_parallel
+    out: list[VerifiedIntent | None] = [None] * len(conclusions)
     rep = IncrementalReport()
-    for vi in conclusions:
+    stale_idx: list[int] = []
+    for i, vi in enumerate(conclusions):
         rep.examined += 1
         verdict, _reason = classify(vi, changes, current)
         if verdict is IntentState.VERIFIED:
-            out.append(vi); rep.unchanged += 1
+            out[i] = vi; rep.unchanged += 1
         elif verdict is IntentState.INVALIDATED:
-            out.append(mark_invalidated(vi)); rep.affected += 1; rep.invalidated += 1
+            out[i] = mark_invalidated(vi); rep.affected += 1; rep.invalidated += 1
         else:  # STALE
             rep.affected += 1
             if rediscover is None:
-                out.append(mark_stale(vi))
+                out[i] = mark_stale(vi)
             else:
-                rep.model_calls += 1
-                rep.bytes_touched += _size(vi)
-                out.append(_stamp(rediscover(vi), current))
-                rep.recomputed += 1
-    return IncrementalResult(out, current, rep)
+                stale_idx.append(i)
+    if stale_idx:
+        recomputed = run_parallel([lambda vi=conclusions[i]: rediscover(vi) for i in stale_idx])
+        for i, res in zip(stale_idx, recomputed):
+            out[i] = _stamp(res, current)
+            rep.model_calls += 1
+            rep.bytes_touched += _size(conclusions[i])
+            rep.recomputed += 1
+    return IncrementalResult(list(out), current, rep)
 
 
 def discover_full(conclusions: list[VerifiedIntent], current: DiscoveryCheckpoint,
@@ -155,13 +165,15 @@ def discover_full(conclusions: list[VerifiedIntent], current: DiscoveryCheckpoin
     """The baseline: rescan EVERYTHING — re-derive every conclusion regardless of what changed. Same
     valid outcome as ``discover_incremental`` for the unchanged conclusions, at full cost. Benchmark B
     shows the incremental path reaches the same valid set touching far less."""
-    out: list[VerifiedIntent] = []
+    from ._parallel import run_parallel
     rep = IncrementalReport()
+    # every conclusion is re-derived independently — overlap them when DISCOVERY_CONCURRENCY>1, order kept.
+    results = run_parallel([lambda vi=vi: rediscover(vi) for vi in conclusions])
+    out: list[VerifiedIntent] = [_stamp(res, current) for res in results]
     for vi in conclusions:
         rep.examined += 1
         rep.affected += 1
         rep.model_calls += 1
         rep.bytes_touched += _size(vi)
-        out.append(_stamp(rediscover(vi), current))
         rep.recomputed += 1
     return IncrementalResult(out, current, rep)

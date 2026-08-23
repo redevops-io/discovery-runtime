@@ -73,7 +73,11 @@ def draft_intent(
     if not readers:
         raise ValueError("draft_intent needs at least one reader")
 
-    reading = fusion_policy([r.read(text) for r in readers])
+    # Readers are independent (fusion consumes the set; no reader is privileged) — overlap them when
+    # DISCOVERY_CONCURRENCY>1 so a deterministic rule reader and a latency-dominant model reader run
+    # concurrently. Order is preserved, so fusion is identical to the serial path.
+    from ._parallel import run_parallel
+    reading = fusion_policy(run_parallel([lambda r=r: r.read(text) for r in readers]))
     interpreted = canonicalize(reading.payload)
 
     contested = {u.dimension for u in reading.unresolved if u.result_changing}
