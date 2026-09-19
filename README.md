@@ -100,6 +100,39 @@ Demonstration and experience compose rather than compete: a demonstrated example
 `origin=DEMONSTRATION` that counts as support but does not bypass the gate — *demonstration teaches the
 initial workflow; experience teaches where it should improve.*
 
+### Consuming `learn` from another project
+
+`learn` is domain-agnostic and meant to be shared — a second self-learning experiment should **consume
+this contract, not reimplement one**, so every domain's learning gets the same invariant and the same
+Wilson-lower-bound arithmetic. This repo is public; pin it by tag (never a branch):
+
+```toml
+# pyproject.toml
+dependencies = [
+  "discovery-runtime @ git+https://github.com/redevops-io/discovery-runtime.git@v0.1.13",
+]
+```
+
+`v0.1.13` is the clean forward line carrying `learn`; it pulls its own `runtime-contracts` pin
+transitively, so a bare `pip install` of the line above is enough (no auth — public repo).
+
+```python
+from discovery_runtime.learn import observe, mine, propose, review, PromotionPolicy, Outcome, Origin
+
+# 1. record decisions + outcomes as domain-agnostic Experiences (context_signature is opaque to learn)
+xs = [observe("regime=trending|vol=high", "pick", "scale_in", Outcome.GOOD, runtime_version="exp-2")
+      for _ in range(6)]
+# 2. mine → propose → the gate. A single observation can NEVER promote — by the Wilson arithmetic.
+candidate = propose(mine(xs)[0], "In this regime, scale in.")
+lesson = review(candidate, accepted=True, reviewer="owner", policy=PromotionPolicy(min_support=3))
+assert lesson.is_active            # only because support ≥ 3, confidence clears, AND a human accepted
+```
+
+The reusable surface is exactly what `discovery_runtime.learn` exports: the value objects
+(`Experience` / `Pattern` / `Lesson` / `LearningCandidate`), the `PromotionPolicy` gate, and the
+lifecycle `observe → mine → propose → shadow / review → challenge`. Everything domain-specific — what a
+`context_signature` means, what counts as a good `Outcome`, who reviews — stays in the consumer.
+
 ## Invariants
 
 1. **No reader is privileged.** Two readers disagreeing on a material field → that field becomes an
