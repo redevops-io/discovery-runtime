@@ -184,7 +184,13 @@ def test_every_released_tag_declared_its_own_version():
     #:   v0.1.5 .. v0.1.7 three releases cut without bumping the version. Each
     #:                    installs as 0.1.4. This is the one that was
     #:                    preventable and that the check above now prevents.
-    KNOWN_STALE = {"v0.1.3", "v0.1.4", "v0.1.5", "v0.1.6", "v0.1.7"}
+    #:   v0.1.11          same cause, later: cut from a commit still declaring
+    #:                    0.1.10 (the in-dev number), so it installs as 0.1.10.
+    #:                    v0.1.12 correctly declares 0.1.12 but sits on a line
+    #:                    that never reached master; the clean forward line
+    #:                    resumes at v0.1.13 (above every number above), which
+    #:                    carries the learn contract.
+    KNOWN_STALE = {"v0.1.3", "v0.1.4", "v0.1.5", "v0.1.6", "v0.1.7", "v0.1.11"}
 
     stale = set()
     for tag in _tags():

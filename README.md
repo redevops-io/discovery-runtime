@@ -1,8 +1,9 @@
 ## Release line
 
-Current: **v0.1.4**. `v0.2.0` is reserved for the coordinated release milestone
-across `runtime-contracts` and this package, and nothing before it may claim a
-`0.2.x` or higher number.
+Current: **v0.1.13** — the clean forward line, carrying the `discovery_runtime.learn`
+contract. `v0.2.0` is reserved for the coordinated release milestone across
+`runtime-contracts` and this package, and nothing before it may claim a `0.2.x` or
+higher number.
 
 ### Superseded tags
 
@@ -17,7 +18,12 @@ anybody who already pinned it:
     v0.3.0  ==  v0.1.3   (superseded — do not pin)
     v0.4.0  ==  v0.1.4   (superseded — do not pin)
 
-Pin `v0.1.4`.
+Two more tags installed under the wrong number and are frozen in the release-line
+test's ledger rather than deleted (a published tag is immutable): `v0.1.11` was cut
+while `pyproject` still said `0.1.10`, so it installs as `0.1.10`; `v0.1.12` declares
+`0.1.12` correctly but sits on a line that never reached `master`. Do not pin either.
+
+Pin `v0.1.13` (latest; carries the learn contract).
 
 # discovery-runtime
 
