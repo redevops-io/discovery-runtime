@@ -64,6 +64,36 @@ pure functions (same input → same output, replay-safe). `DiscoveryRuntime` is 
 shell that owns the schema + readers + policy. No domain verbs (`discover_assets`, …) ever appear
 here; domains inject readers and a `canonicalize`.
 
+## Learning — a correction is not a rule
+
+Discovery turns words into a sealed conclusion. `discovery_runtime.learn` is the other direction over
+time: turn the outcomes of past decisions into priors that improve the next one — **without** letting a
+single human correction, or a single lucky trial, rewrite the system on the spot.
+
+```
+experience → pattern → candidate → (review / shadow) → lesson vN+1
+                                    └ never auto-promoted; validation_required
+```
+
+This is the contract the [chess ablation](https://redevops.io/benchmarks/decision-runtime-chess/) earned.
+There a strong independent oracle (Stockfish) scores every decision — and *even then* the measured
+learning came from lessons mined from many scored decisions and gated by support and confidence, never
+written from one game. Real domains (revenue, projects, GRC) have no such oracle, so the shortcut
+`human correction → permanent rule` is exactly what this module refuses. A correction is an `Experience`;
+enough consistent experiences become a `Pattern`; a Pattern can be *proposed* as a `LearningCandidate`;
+and only an explicit review/shadow step (the stand-in for the missing oracle) turns an **eligible**
+candidate into an **active** `Lesson`.
+
+It is domain-agnostic like the rest of the runtime — parameterized by a `context_signature` it never
+interprets. Chess: *"in this position signature, be cautious with queen checks."* Revenue: *"opportunities
+with characteristics X and Y have historically responded poorly."* Projects: *"when exactly one contact is
+on the active opportunity, select that contact."* Same lifecycle, different words. Confidence is a
+closed-form Wilson lower bound, so it is conservative for small samples **by construction** (one supporting
+experience scores ~0.21, ten score ~0.72) — the invariant falls out of the arithmetic, not a special case.
+Demonstration and experience compose rather than compete: a demonstrated example is an `Experience` with
+`origin=DEMONSTRATION` that counts as support but does not bypass the gate — *demonstration teaches the
+initial workflow; experience teaches where it should improve.*
+
 ## Invariants
 
 1. **No reader is privileged.** Two readers disagreeing on a material field → that field becomes an
@@ -73,6 +103,9 @@ here; domains inject readers and a `canonicalize`.
    canonical meaning + evidence + unresolved. A plan re-runs from the hash, never from the sentence.
 4. **The runtime is domain-free.** Meaning lives in `runtime-contracts`; semantics live in the
    consumer. This runtime only knows how to *discover, contest, clarify, and seal* a dimension.
+5. **A correction is not a rule.** No single experience — not even a deliberate human correction, not
+   even a clean demonstration — becomes an active `Lesson`. Promotion needs support, confidence, and an
+   explicit review; and an active lesson is retired when counter-evidence pulls it below threshold.
 
 ## Test
 
