@@ -133,6 +133,33 @@ The reusable surface is exactly what `discovery_runtime.learn` exports: the valu
 lifecycle `observe → mine → propose → shadow / review → challenge`. Everything domain-specific — what a
 `context_signature` means, what counts as a good `Outcome`, who reviews — stays in the consumer.
 
+> **Contract evolution.** Consumers should pin `discovery-runtime` to a released tag. If a consumer needs
+> a change to the shared `learn` contract or lifecycle semantics, make that change in `discovery-runtime`,
+> release a new tag, and update consumers to that tag. Do not fork or locally redefine the learning
+> contract in downstream projects.
+
+The boundary this draws:
+
+```
+discovery-runtime owns          consumer owns (e.g. a portfolio experiment)
+  Experience                      context_signature semantics
+  Pattern                         domain Outcome semantics
+  LearningCandidate               evidence mapping
+  Lesson                          reviewer identity / policy
+  lifecycle arithmetic            domain evaluation
+  promotion invariants
+```
+
+A consumer should be a thin **adapter** around `observe → mine → propose → shadow → review → challenge`,
+not a second learning implementation — so it is testing this runtime's actual mechanism, not a
+domain-specific recreation of it. That is also what makes `learn`'s conservatism load-bearing downstream:
+where the learning sample is tiny (a few dozen decisions), the centralized Wilson gate is precisely what
+stops a single reviewed success or failure from becoming a persistent rule.
+
+For a **reproducible** run, record the *resolved* git commit and the installed `runtime-contracts` version
+in the experiment manifest, not just the tag — so a frozen result keeps an immutable identity even if
+tag/repository infrastructure later changes.
+
 ## Invariants
 
 1. **No reader is privileged.** Two readers disagreeing on a material field → that field becomes an
