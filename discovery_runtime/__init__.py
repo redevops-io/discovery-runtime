@@ -41,6 +41,25 @@ from .incremental import (
     mark_stale,
     mark_invalidated,
 )
+from .learn import (
+    Outcome,
+    Origin,
+    LessonState,
+    Experience,
+    Pattern,
+    Lesson,
+    LearningCandidate,
+    PromotionPolicy,
+    wilson_lower_bound,
+    observe,
+    from_demonstration,
+    mine,
+    eligible,
+    propose,
+    shadow,
+    review,
+    challenge,
+)
 
 __version__ = "0.1.10"
 
@@ -70,6 +89,24 @@ __all__ = [
     "evidence_ids",
     "mark_stale",
     "mark_invalidated",
+    # learn — the experience→lesson lifecycle ("a correction is not a rule")
+    "Outcome",
+    "Origin",
+    "LessonState",
+    "Experience",
+    "Pattern",
+    "Lesson",
+    "LearningCandidate",
+    "PromotionPolicy",
+    "wilson_lower_bound",
+    "observe",
+    "from_demonstration",
+    "mine",
+    "eligible",
+    "propose",
+    "shadow",
+    "review",
+    "challenge",
     # re-exported canonical contracts (single owner = runtime-contracts)
     "VerifiedIntent",
     "DecisionEvidence",
