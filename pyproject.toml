@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "discovery-runtime"
-version = "0.1.13"
+version = "0.1.14"
 description = "Generic Intent-Discovery runtime — words → sealed VerifiedIntent via multi-witness readers, fusion, clarification, and seal. Domain-agnostic; RAAAL/Quantify and GRC are consumers."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,8 +17,13 @@ keywords = ["redevops", "discovery", "intent", "runtime", "verified-intent"]
 # drifted apart under an unpinned dependency: 0.2.0 was written against an older DecisionEvidence
 # and VerifiedIntent, every conformance test failed, and neither repository could see it alone.
 # tests/test_contract_compatibility.py asserts the installed version matches this.
+#
+# v0.1.14: aligned to runtime-contracts v0.3.4 (a superset of v0.3.0 — it ADDS the interaction
+# contracts agentic-os needs; every symbol this package imports is unchanged). The prior exact @v0.3.0
+# pin conflicted with agentic-os's @v0.3.4 pin, so no consumer could install both in one environment.
+# The full suite (72 tests) passes unchanged against v0.3.4.
 dependencies = [
-    "runtime-contracts @ git+https://github.com/redevops-io/runtime-contracts.git@v0.3.0",
+    "runtime-contracts @ git+https://github.com/redevops-io/runtime-contracts.git@v0.3.4",
 ]
 
 [project.optional-dependencies]
