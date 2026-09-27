@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "discovery-runtime"
-version = "0.1.14"
+version = "0.1.15"
 description = "Generic Intent-Discovery runtime — words → sealed VerifiedIntent via multi-witness readers, fusion, clarification, and seal. Domain-agnostic; RAAAL/Quantify and GRC are consumers."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -22,8 +22,13 @@ keywords = ["redevops", "discovery", "intent", "runtime", "verified-intent"]
 # contracts agentic-os needs; every symbol this package imports is unchanged). The prior exact @v0.3.0
 # pin conflicted with agentic-os's @v0.3.4 pin, so no consumer could install both in one environment.
 # The full suite (72 tests) passes unchanged against v0.3.4.
+# v0.1.15: re-aligned to runtime-contracts v0.3.11 (a further additive superset — v0.3.4→v0.3.11 is
+# +5161/-15 lines, adds the intelligence layer, removes no public symbol this package imports). agentic-os
+# bumped its direct rc pin to v0.3.11 for that layer but left this package at v0.3.4, so no consumer
+# (agentic-os itself, or the enterprise overlay) could resolve — pip AND uv both hit ResolutionImpossible.
+# The full suite (72 tests) passes unchanged against v0.3.11.
 dependencies = [
-    "runtime-contracts @ git+https://github.com/redevops-io/runtime-contracts.git@v0.3.4",
+    "runtime-contracts @ git+https://github.com/redevops-io/runtime-contracts.git@v0.3.11",
 ]
 
 [project.optional-dependencies]
