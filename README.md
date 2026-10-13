@@ -183,3 +183,7 @@ PYTHONPATH=../runtime-contracts python -m pytest tests/ -q
 
 The conformance suite uses a deliberately non-finance toy domain ("book a meeting") to prove the
 runtime is domain-agnostic.
+
+## License
+
+AGPL-3.0-or-later with the Commons Clause (source-available; see [LICENSE.md](LICENSE.md), [LICENSE](LICENSE), [LICENSE-COMMONS-CLAUSE](LICENSE-COMMONS-CLAUSE)).
