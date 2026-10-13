@@ -1,0 +1,35 @@
+name: tests
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0     # tests/test_release_line.py inspects every published tag
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install (dev extra)
+        run: python -m pip install -e ".[dev]"
+      - name: Reinstall runtime-contracts from a clean tree
+        # runtime-contracts tags up to v0.3.13 commit a stale build/lib that pip installs instead of the
+        # source (fixed from v0.3.14). Same pin, built without it. Drop once the pin is >= v0.3.14.
+        run: |
+          git clone --quiet --depth 1 --branch v0.3.13 https://github.com/redevops-io/runtime-contracts /tmp/rc
+          rm -rf /tmp/rc/build
+          python -m pip install --force-reinstall --no-deps /tmp/rc
+      - name: Test
+        run: pytest -q

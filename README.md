@@ -1,6 +1,6 @@
 ## Release line
 
-Current: **v0.1.13** — the clean forward line, carrying the `discovery_runtime.learn`
+Current: **v0.1.17** — the clean forward line, carrying the `discovery_runtime.learn`
 contract. `v0.2.0` is reserved for the coordinated release milestone across
 `runtime-contracts` and this package, and nothing before it may claim a `0.2.x` or
 higher number.
@@ -18,12 +18,14 @@ anybody who already pinned it:
     v0.3.0  ==  v0.1.3   (superseded — do not pin)
     v0.4.0  ==  v0.1.4   (superseded — do not pin)
 
+The tags remain and are intentionally not deleted. They are not releases of this package: the real line is `v0.1.x`. See [CHANGELOG.md](CHANGELOG.md).
+
 Two more tags installed under the wrong number and are frozen in the release-line
 test's ledger rather than deleted (a published tag is immutable): `v0.1.11` was cut
 while `pyproject` still said `0.1.10`, so it installs as `0.1.10`; `v0.1.12` declares
 `0.1.12` correctly but sits on a line that never reached `master`. Do not pin either.
 
-Pin `v0.1.13` (latest; carries the learn contract).
+Pin `v0.1.17` (latest; carries the learn contract). The `v0.1.17` tag predates a one-line fix: its `discovery_runtime.__version__` reads `0.1.16` while the package metadata says `0.1.17`; fixed on `master` after the tag.
 
 # discovery-runtime
 
@@ -109,11 +111,11 @@ Wilson-lower-bound arithmetic. This repo is public; pin it by tag (never a branc
 ```toml
 # pyproject.toml
 dependencies = [
-  "discovery-runtime @ git+https://github.com/redevops-io/discovery-runtime.git@v0.1.13",
+  "discovery-runtime @ git+https://github.com/redevops-io/discovery-runtime.git@v0.1.17",
 ]
 ```
 
-`v0.1.13` is the clean forward line carrying `learn`; it pulls its own `runtime-contracts` pin
+`v0.1.17` is the clean forward line carrying `learn` (introduced in `v0.1.13`); it pulls its own `runtime-contracts` pin
 transitively, so a bare `pip install` of the line above is enough (no auth — public repo).
 
 ```python
