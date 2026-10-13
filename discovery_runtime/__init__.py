@@ -61,7 +61,7 @@ from .learn import (
     challenge,
 )
 
-__version__ = "0.1.17"
+__version__ = "0.1.18"
 
 __all__ = [
     "DiscoveryRuntime",
