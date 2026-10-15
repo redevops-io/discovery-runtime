@@ -1,39 +1,50 @@
-## Release line
-
-Current: **v0.1.17** — the clean forward line, carrying the `discovery_runtime.learn`
-contract. `v0.2.0` is reserved for the coordinated release milestone across
-`runtime-contracts` and this package, and nothing before it may claim a `0.2.x` or
-higher number.
-
-### Superseded tags
-
-`v0.3.0` and `v0.4.0` were published in error. This package had never released
-a tag — its `pyproject.toml` said `0.2.0` and nothing was ever pushed — so those
-two took numbers off a line that had not been opened.
-
-They point at the same commits as the correct tags and are left in place rather
-than deleted, because a published tag is immutable and deleting one breaks
-anybody who already pinned it:
-
-    v0.3.0  ==  v0.1.3   (superseded — do not pin)
-    v0.4.0  ==  v0.1.4   (superseded — do not pin)
-
-The tags remain and are intentionally not deleted. They are not releases of this package: the real line is `v0.1.x`. See [CHANGELOG.md](CHANGELOG.md).
-
-Two more tags installed under the wrong number and are frozen in the release-line
-test's ledger rather than deleted (a published tag is immutable): `v0.1.11` was cut
-while `pyproject` still said `0.1.10`, so it installs as `0.1.10`; `v0.1.12` declares
-`0.1.12` correctly but sits on a line that never reached `master`. Do not pin either.
-
-Pin `v0.1.17` (latest; carries the learn contract). The `v0.1.17` tag predates a one-line fix: its `discovery_runtime.__version__` reads `0.1.16` while the package metadata says `0.1.17`; fixed on `master` after the tag.
-
 # discovery-runtime
 
 ![License: AGPL-3.0 + Commons Clause](https://img.shields.io/badge/License-AGPL--3.0%20%2B%20Commons%20Clause-blue.svg) ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg) [![NVIDIA Inception](https://img.shields.io/badge/NVIDIA-Inception%20Program%20Member-76B900.svg)](https://www.nvidia.com/en-us/startups/)
 &nbsp;·&nbsp; self-hosted &nbsp;·&nbsp; no lock-in &nbsp;·&nbsp; source-available
 
-> **🚀 NVIDIA Inception Program Member** — ReDevOps is a member of the NVIDIA Inception Program, supporting startups advancing AI and accelerated computing. Membership provides access to NVIDIA technology, technical resources, and the startup ecosystem. It does not imply product endorsement by NVIDIA.
+**What it does.** Intent discovery: turns a requester's words into a sealed `VerifiedIntent`
+(words -> readers -> fuse -> clarify -> seal). It refuses to seal while anything result-changing is
+still open. A second module, `discovery_runtime.learn`, turns outcomes of past decisions into
+reviewed priors. (This is *not* the "proactive layer that monitors and proposes missions" described in
+the GitHub repository blurb; that is a different component and is not in this repo.)
 
+**Who it's for.** Developers building a domain application that needs a verified, hash-identified
+statement of what the user asked for. Domain meaning lives in consumers; this repo is the generic mechanism.
+
+**Maturity: reference.** A library with a conformance test suite; no stated production deployment in this repo.
+
+**3-minute example.** There is no runnable end-to-end example in this repo: the snippet below needs a
+user-defined schema and readers. What does run is the test suite (uses a toy "book a meeting" domain):
+
+```bash
+PYTHONPATH=../runtime-contracts python -m pytest tests/ -q   # needs a sibling runtime-contracts checkout
+```
+
+**Evidence.** `tests/` (conformance, `tests/test_learn.py`, `tests/test_release_line.py`). The Wilson figures
+quoted under "Learning" (0.2065 and 0.7225) are *internally reproduced* closed-form arithmetic.
+The chess-ablation link is an external page whose result is not audited here.
+
+**Limitations.** Requires consumer-supplied schema and readers; no PyPI package (git-tag install only);
+the test command assumes a sibling `runtime-contracts` checkout; consumers named below (`wealth-manager`, GRC)
+are not public.
+
+**Docs.** [STATUS.md](STATUS.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/release-history.md](docs/release-history.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [LICENSE.md](LICENSE.md)
+
+> **NVIDIA Inception Program Member** — ReDevOps is a member of the NVIDIA Inception Program, supporting startups advancing AI and accelerated computing. Membership provides access to NVIDIA technology, technical resources, and the startup ecosystem. It does not imply product endorsement by NVIDIA.
+
+## Release status (pinned)
+
+Current release: **v0.1.19** (latest tag by date, 2026-10-14; package and `__version__` both `0.1.19`). Use `v0.1.19` or later on the `v0.1.x` line.
+
+- `v0.3.0` and `v0.4.0` are stray tags published in error. They resolve to the same commits as `v0.1.3` and `v0.1.4`
+  (`v0.3.0 == v0.1.3`, `v0.4.0 == v0.1.4`), sort above `v0.1.19` under semver, are superseded, and are intentionally **not deleted**
+  (a published tag is immutable). Do not pin them.
+- `v0.1.17` falls in the range the CHANGELOG describes as affected by a stale `build/lib` in `runtime-contracts` (tags up to v0.3.13), and its `__version__` reads `0.1.16`. Recommend `>= v0.1.19`.
+- Also do not pin `v0.1.11` (installs as `0.1.10`) or `v0.1.12` (on a line that never reached `master`).
+- `v0.2.0` is reserved for a coordinated milestone with `runtime-contracts`.
+
+Full history: [docs/release-history.md](docs/release-history.md).
 
 The generic **Intent-Discovery runtime**: turn a requester's words into a sealed `VerifiedIntent`.
 
@@ -111,11 +122,11 @@ Wilson-lower-bound arithmetic. This repo is public; pin it by tag (never a branc
 ```toml
 # pyproject.toml
 dependencies = [
-  "discovery-runtime @ git+https://github.com/redevops-io/discovery-runtime.git@v0.1.17",
+  "discovery-runtime @ git+https://github.com/redevops-io/discovery-runtime.git@v0.1.19",
 ]
 ```
 
-`v0.1.17` is the clean forward line carrying `learn` (introduced in `v0.1.13`); it pulls its own `runtime-contracts` pin
+`v0.1.19` is the latest tag on the forward line carrying `learn` (introduced in `v0.1.13`); it pulls its own `runtime-contracts` pin
 transitively, so a bare `pip install` of the line above is enough (no auth — public repo).
 
 ```python
