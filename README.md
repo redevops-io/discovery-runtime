@@ -35,7 +35,7 @@ are not public.
 
 ## Release status (pinned)
 
-Current release: **v0.1.19** (latest tag by date, 2026-10-14; package and `__version__` both `0.1.19`). Use `v0.1.19` or later on the `v0.1.x` line.
+Current release: **v0.1.19** (latest tag by date, 2026-10-14). The source tree declares `0.1.20` = docs-only; no tag yet (v0.1.20 = docs-only; no tag yet). Pin `@v0.1.19` until a v0.1.20 tag exists. Use `v0.1.19` or later on the `v0.1.x` line.
 
 - `v0.3.0` and `v0.4.0` are stray tags published in error. They resolve to the same commits as `v0.1.3` and `v0.1.4`
   (`v0.3.0 == v0.1.3`, `v0.4.0 == v0.1.4`), sort above `v0.1.19` under semver, are superseded, and are intentionally **not deleted**

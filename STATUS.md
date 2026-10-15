@@ -1,7 +1,7 @@
 # Status
 
 - **Maturity:** reference (library with a conformance test suite; no production deployment claimed in this repo).
-- **Version:** v0.1.19 (package and `__version__` both `0.1.19`); latest tag by date, 2026-10-14. No GitHub Releases, tags only.
+- **Version:** latest tag v0.1.19 (2026-10-14); source declares `0.1.20` = docs-only, no tag yet. No GitHub Releases, tags only.
 - **Last git activity:** 2026-10-14 (`git log -1 --format=%cs` on master at the time of writing).
 - **Supported:** intent discovery (`DiscoveryRuntime`: draft, clarify, resolve, seal) and the `discovery_runtime.learn` lifecycle (observe, mine, propose, shadow/review, challenge). Python 3.10+ (CI runs 3.12). Install by git tag only.
 - **Not supported / not provided:** PyPI package (none published); a runnable end-to-end example (needs consumer schema and readers); the "proactive monitoring / propose missions" behaviour described in the GitHub repo blurb; anything in the private consumers (`wealth-manager`, GRC).

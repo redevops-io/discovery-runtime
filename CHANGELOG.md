@@ -3,6 +3,13 @@
 The release line is `v0.1.x`. `v0.2.0` is reserved for a coordinated milestone with
 `runtime-contracts`.
 
+## Unreleased / 0.1.20 — documentation only
+
+Policy-driven docs-only version bump (`tests/test_release_line.py` requires every commit after a tag to declare a new
+version). No runtime behaviour change. v0.1.20 has no tag yet; none is created by this change.
+
+- Docs: README leads with what the package does; release history moved to `docs/release-history.md`; STATUS/CONTRIBUTING/SECURITY added.
+
 ## v0.1.19 and v0.1.18 (released)
 
 Both tags exist (v0.1.18 2026-10-13, v0.1.19 2026-10-14). Entries below were written before the tags were cut.
