@@ -5,7 +5,9 @@ The release line is `v0.1.x`. `v0.2.0` is reserved for a coordinated milestone w
 
 ## Unreleased
 
-- Version `0.1.19` (tag to be cut after merge): realign `runtime-contracts` pin v0.3.13 -> v0.3.14. Tags up to
+- Version `0.1.20`: documentation wording cleanup only.
+
+- Version `0.1.19`: realign `runtime-contracts` pin v0.3.13 -> v0.3.14. Tags up to
   v0.3.13 commit a stale `build/lib` that pip may install instead of the source; v0.3.14 removes it.
 - CI: remove the "Reinstall runtime-contracts from a clean tree" workaround (no longer needed); `fetch-depth: 0`
   is kept for the release-line test.
