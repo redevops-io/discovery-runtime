@@ -11,6 +11,6 @@
 - Stray tags `v0.3.0` and `v0.4.0` (same commits as `v0.1.3` / `v0.1.4`) sort above `v0.1.19` under semver. Superseded, not deleted. Do not pin.
 - `v0.1.11` installs as `0.1.10`; `v0.1.12` is on a line that never reached `master`; `v0.1.17` reports `__version__` `0.1.16` and is in the stale `build/lib` range; prefer `>= v0.1.19`.
 - Test command assumes a sibling `runtime-contracts` checkout.
-- Licence labelling: see [LICENSE.md](LICENSE.md); GitHub's licence label and the file text differ (flagged for counsel review, no conclusion here).
+- Licence: see `LICENSE.md`.
 
 See [docs/release-history.md](docs/release-history.md) and [CHANGELOG.md](CHANGELOG.md).
